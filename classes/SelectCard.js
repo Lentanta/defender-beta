@@ -12,7 +12,7 @@ export class SelectCard {
   }
 
   draw() {
-    this.sprite.src = './assets/defenders-card.PNG';
+    this.sprite.src = './assets/defenders-card.png';
 
     ctx.drawImage(
       this.sprite,
