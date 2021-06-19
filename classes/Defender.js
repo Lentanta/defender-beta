@@ -70,7 +70,7 @@ export class Defender {
       ctx.font = '8px Arial';
       ctx.fillText(Math.floor(this.health), this.x, this.y + 8);
     }
-    this.sprite.src = '../assets/defenders.png';
+    this.sprite.src = '../assets/defenders.PNG';
 
     // ctx.fillStyle = 'blue';
     // ctx.fillRect(this.x + this.width, this.y, canvas.width, this.height);

@@ -23,7 +23,7 @@ export class Mosnter {
         // ctx.font = '8px Arial';
         // ctx.fillText(Math.floor(this.health), this.x, this.y + 8);
 
-        this.sprite.src = '../assets/monsters.png';
+        this.sprite.src = '../assets/monsters.PNG';
 
 
         ctx.drawImage(
