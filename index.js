@@ -106,10 +106,13 @@ const handleInformationUI = () => {
 	infomationUI.resource = resources;
 }
 const createSelectCards = () => {
-	for (let i = 0; i < 2; i++) {
-		selectCards.push(new SelectCard(
-			(cellSize * 6) + cellSize * i * 2, 0,
-			cellSize, i))
+	for (let i = 0; i < 5; i++) {
+		const xPos = (cellSize * 4) + (cellSize * i * 2)
+		const newCard = new SelectCard(
+			xPos, 0,
+			cellSize, i
+		)
+		selectCards.push(newCard)
 	}
 }
 const handleSelectCards = () => {
