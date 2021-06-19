@@ -10,7 +10,7 @@ export class InfomationUI {
   }
 
   draw() {
-    this.sprite.src = '../assets/informationUI.PNG';
+    this.sprite.src = './assets/informationUI.PNG';
 
     ctx.drawImage(
       this.sprite,
