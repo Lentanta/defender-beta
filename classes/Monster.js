@@ -1,3 +1,5 @@
+import { IMG_PATH } from '../utils/constants.js';
+
 export class Mosnter {
     constructor(y, size) {
         this.x = canvas.width;
@@ -23,7 +25,7 @@ export class Mosnter {
         // ctx.font = '8px Arial';
         // ctx.fillText(Math.floor(this.health), this.x, this.y + 8);
 
-        this.sprite.src = './assets/monsters.png';
+        this.sprite.src = `${IMG_PATH}/monsters.png`;
 
 
         ctx.drawImage(
