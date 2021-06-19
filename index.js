@@ -5,6 +5,7 @@ import { randomBetween } from './utils/functions.js';
 import { Cell } from './classes/Cell.js';
 import { Mouse } from './classes/Mouse.js';
 import { Defender } from './classes/Defender.js';
+import { Factory } from './classes/Factory.js';
 import { Mosnter } from './classes/Monster.js';
 import { SelectCard } from './classes/SelectCard.js';
 import { InfomationUI } from './classes/InfomationUI.js';
@@ -17,6 +18,7 @@ const selectCards = [];
 
 let gameGrid = [];
 let defenders = [];
+let factories = [];
 let bullets = [];
 let numberParticles = [];
 
@@ -24,9 +26,12 @@ let monsters = [];
 let monsterPosition = [];
 
 let spawnMonsterTime = 0;
+let spawnMonsterDelay = 200;
+let monterKills = 0;
+
 let selectType = -1;
 
-let resources = 1000000;
+let resources = 100;
 let gameOver = false;
 
 const topMenu = {
@@ -59,7 +64,7 @@ canvas.addEventListener('click', () => {
 	if (gridPosY < topMenu.height) {
 		for (let i = 0; i < selectCards.length; i++) {
 			if (collisionRect(selectCards[i], mouse)) {
-				selectType = selectCards[i].type;
+				selectType = selectCards[i].pos;
 			}
 		};
 	} else {
@@ -76,9 +81,12 @@ canvas.addEventListener('click', () => {
 		if (selectType >= 0 && resources >= cost) {
 			switch (selectType) {
 				case 0:
-					defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 50));
+					factories.push(new Factory(gridPosX, gridPosY, cellSize, 10, 200))
 					break;
 				case 1:
+					defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 50));
+					break;
+				case 2:
 					defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 10));
 					break;
 				default:
@@ -86,6 +94,13 @@ canvas.addEventListener('click', () => {
 			}
 
 			resources -= cost;
+			selectType = -1;
+		}
+		if (selectType >= 0 && resources < cost) {
+			numberParticles.push(new NumberParticle(
+				gridPosX, gridPosY,
+				'Khong du tai nguyen', 0.02, 20
+			));
 			selectType = -1;
 		}
 
@@ -117,7 +132,9 @@ const createSelectCards = () => {
 }
 const handleSelectCards = () => {
 	for (let i = 0; i < selectCards.length; i++) {
-		selectCards[i].draw();
+		const isActive = collisionRect(selectCards[i], mouse)
+			|| selectType === selectCards[i].pos
+		selectCards[i].draw(isActive);
 	}
 }
 
@@ -167,6 +184,20 @@ const handleDefenders = () => {
 	}
 }
 
+// --- FACTORY --- //
+const increaseResources = (amount) => {
+	resources += amount;
+};
+const handleFactories = () => {
+	for (let i = factories.length - 1; i > -1; i--) {
+		factories[i].draw();
+		factories[i].update(
+			increaseResources,
+			numberParticles
+		);
+	}
+}
+
 // --- MONSTER --- //
 const handleMonsters = () => {
 	for (let i = 0; i < monsters.length; i++) {
@@ -178,12 +209,13 @@ const handleMonsters = () => {
 
 		if (monsters[i].health <= 0) {
 			monsters.splice(i, 1);
+			monterKills++;
 			i--;
 		}
 	};
 
 	// Spawn monster
-	if (spawnMonsterTime === 200) {
+	if (spawnMonsterTime >= spawnMonsterDelay) {
 		const yPos = (Math.floor(Math.random() * 8 + 0) * cellSize) + topMenu.height;
 		monsters.push(new Mosnter(yPos, cellSize));
 		monsterPosition.push(yPos);
@@ -207,10 +239,12 @@ const handleBullets = () => {
 
 				const particleX = randomBetween(monsters[m].x, monsters[m].width / 2);
 				const fadeNum = (Math.random() * 0.09) + 0.01;
-				numberParticles.push(new NumberParticle(
-					particleX, monsters[m].y,
-					`-${bullets[i].power}`, fadeNum
-				))
+				numberParticles.push(
+					new NumberParticle(
+						particleX, monsters[m].y,
+						`-${bullets[i].power}`, fadeNum,
+						bullets[i].power + 5
+					))
 
 				monsters[m].health -= bullets[i].power;
 				bullets.splice(i, 1);
@@ -233,6 +267,15 @@ const handleParticles = () => {
 	}
 }
 
+const handleGameDifficulty = () => {
+	if (monterKills > 1) {
+		spawnMonsterDelay = 100;
+	}
+	if (monterKills > 2) {
+		spawnMonsterDelay = 30;
+	}
+}
+
 const initialize = () => {
 	// For pixel art
 	ctx.webkitImageSmoothingEnabled = false;
@@ -250,9 +293,11 @@ const gameLoop = () => {
 	handleInformationUI();
 	handleSelectCards();
 	handleDefenders();
-	handleMonsters();
+	handleFactories();
+	// handleMonsters();
 	handleBullets();
 	handleParticles();
+	handleGameDifficulty();
 	requestAnimationFrame(gameLoop);
 };
 

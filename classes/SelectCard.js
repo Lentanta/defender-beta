@@ -11,7 +11,7 @@ export class SelectCard {
     this.sprite = new Image();
   }
 
-  draw() {
+  draw(isActive) {
     this.sprite.src = `${IMG_PATH}/cardUI.png`;
     ctx.drawImage(
       this.sprite,
@@ -20,5 +20,15 @@ export class SelectCard {
       this.x, this.y,
       this.width, this.height
     )
+
+    if (isActive) {
+      ctx.drawImage(
+        this.sprite,
+        0, 16 * 2,
+        16 * 2, 16 * 2,
+        this.x, this.y,
+        this.width, this.height
+      );
+    }
   }
 }

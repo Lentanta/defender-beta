@@ -1,5 +1,6 @@
 import { Bullet } from "./Bullet.js";
 import { HitBox } from './HitBox.js';
+import { IMG_PATH } from '../utils/constants.js';
 
 export class Defender {
   constructor(x, y, size, type, health, shootDelay) {
@@ -16,7 +17,6 @@ export class Defender {
     this.shootDelay = shootDelay;
 
     this.sprite = new Image();
-    this.debug = false;
 
     this.canonShoot = false;
     this.hitBox = new HitBox(x + size, y, canvas.width, size);
@@ -27,13 +27,13 @@ export class Defender {
       this.shootTime++;
       if (this.shootTime === this.shootDelay) {
         switch (this.type) {
-          case 0:
+          case 1:
             bulletsArr.push(new Bullet(this.x + this.width - (1 * 8), this.y + (2 * 4),
               16, 8,
               20, 30));
             break;
 
-          case 1: {
+          case 2: {
             if (this.canonShoot) {
               bulletsArr.push(new Bullet(this.x + this.width - (1 * 8), this.y + (2 * 4),
                 4, 4,
@@ -48,9 +48,7 @@ export class Defender {
               this.canonShoot = !this.canonShoot;
               break;
             }
-            console.log(this.canonShoot)
           }
-            break;
 
           default:
             break;
@@ -62,22 +60,22 @@ export class Defender {
   };
 
   draw() {
-    if (this.debug) {
+    if (false) {
       ctx.fillStyle = 'blue';
       ctx.fillRect(this.x, this.y, this.width, this.height);
 
       ctx.fillStyle = 'white';
       ctx.font = '8px Arial';
       ctx.fillText(Math.floor(this.health), this.x, this.y + 8);
-    }
-    this.sprite.src = './assets/defenders.png';
+    };
 
-    // ctx.fillStyle = 'blue';
-    // ctx.fillRect(this.x + this.width, this.y, canvas.width, this.height);
+    this.sprite.src = `${IMG_PATH}/machines.png`;
     ctx.drawImage(
       this.sprite,
-      this.type * this.width / 2, 0, this.width / 2, this.height / 2,
-      this.x, this.y, this.width, this.height
+      this.type * 16, 0,
+      16, 16,
+      this.x, this.y,
+      this.width, this.height
     )
   }
 }

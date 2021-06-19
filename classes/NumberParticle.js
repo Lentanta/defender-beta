@@ -1,11 +1,12 @@
 export class NumberParticle {
-  constructor(x, y, number, fadeOutNum) {
+  constructor(x, y, content, fadeOutNum, size) {
     this.x = x;
     this.y = y;
     this.alpha = 1;
     this.speed = 1;
     this.fadeOutNum = fadeOutNum;
-    this.number = number;
+    this.content = content;
+    this.size = size;
   }
 
   update() {
@@ -15,7 +16,7 @@ export class NumberParticle {
 
   draw() {
     ctx.fillStyle = `rgba(118, 68, 98,${this.alpha})`;
-    ctx.font = `bold ${this.number}px Goldman`;
-    ctx.fillText(this.number, this.x, this.y + 10);
+    ctx.font = `bold ${this.size}px Goldman`;
+    ctx.fillText(this.content, this.x, this.y + 10);
   }
 }
