@@ -1,6 +1,7 @@
 import { intitGame } from './utils/DuckEngine.js';
 import { collisionRect } from './utils/collision.js';
 import { randomBetween } from './utils/functions.js';
+import { spriteSheets } from './utils/gameInfo.js';
 
 import { Cell } from './classes/Cell.js';
 import { Mouse } from './classes/Mouse.js';
@@ -10,11 +11,24 @@ import { Mosnter } from './classes/Monster.js';
 import { SelectCard } from './classes/SelectCard.js';
 import { InfomationUI } from './classes/InfomationUI.js';
 import { NumberParticle } from './classes/NumberParticle.js';
+import { Sprite } from './classes/Sprite.js';
+
+
 
 intitGame(960, 640);
 
 const cellSize = 64;
 const selectCards = [];
+
+
+let images = [];
+spriteSheets.forEach((ss) => {
+	images.push(new Sprite(ss.url));
+});
+images.forEach((img) => {
+	img.loadSprite();
+})
+console.log(images)
 
 let gameGrid = [];
 let defenders = [];
@@ -91,6 +105,7 @@ canvas.addEventListener('click', () => {
 				case 2:
 					defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 10));
 					break;
+
 				default:
 					break;
 			}
@@ -287,20 +302,20 @@ const initialize = () => {
 }
 
 const gameLoop = () => {
-	spawnMonsterTime++;
-	ctx.clearRect(0, 0, global.width, global.height);
-	drawGrid();
-	handleInformationUI();
-	handleSelectCards();
-	handleDefenders();
-	handleFactories();
-	handleMonsters();
-	handleBullets();
-	handleParticles();
-	handleGameDifficulty();
 	if (!gameOver) {
-		requestAnimationFrame(gameLoop);
+		spawnMonsterTime++;
+		ctx.clearRect(0, 0, global.width, global.height);
+		drawGrid();
+		handleInformationUI();
+		handleSelectCards();
+		handleDefenders();
+		handleFactories();
+		handleMonsters();
+		handleBullets();
+		handleParticles();
+		handleGameDifficulty();
 	};
+	requestAnimationFrame(gameLoop);
 };
 
 initialize();
