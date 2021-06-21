@@ -88,9 +88,9 @@ canvas.addEventListener('click', () => {
 					defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 50));
 					resources -= cost;
 					break;
-				// case 2:
-				// 	defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 10));
-				// 	break;
+				case 2:
+					defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 10));
+					break;
 				default:
 					break;
 			}
@@ -298,7 +298,9 @@ const gameLoop = () => {
 	handleBullets();
 	handleParticles();
 	handleGameDifficulty();
-	requestAnimationFrame(gameLoop);
+	if (!gameOver) {
+		requestAnimationFrame(gameLoop);
+	};
 };
 
 initialize();
