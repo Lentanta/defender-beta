@@ -31,7 +31,7 @@ let monterKills = 0;
 
 let selectType = -1;
 
-let resources = 100;
+let resources = 800;
 let gameOver = false;
 
 const topMenu = {
@@ -82,18 +82,18 @@ canvas.addEventListener('click', () => {
 			switch (selectType) {
 				case 0:
 					factories.push(new Factory(gridPosX, gridPosY, cellSize, 10, 200))
+					resources -= cost;
 					break;
 				case 1:
 					defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 50));
+					resources -= cost;
 					break;
-				case 2:
-					defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 10));
-					break;
+				// case 2:
+				// 	defenders.push(new Defender(gridPosX, gridPosY, cellSize, selectType, 100, 10));
+				// 	break;
 				default:
 					break;
 			}
-
-			resources -= cost;
 			selectType = -1;
 		}
 		if (selectType >= 0 && resources < cost) {
@@ -294,7 +294,7 @@ const gameLoop = () => {
 	handleSelectCards();
 	handleDefenders();
 	handleFactories();
-	// handleMonsters();
+	handleMonsters();
 	handleBullets();
 	handleParticles();
 	handleGameDifficulty();
