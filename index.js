@@ -14,12 +14,10 @@ import { NumberParticle } from './classes/NumberParticle.js';
 import { Sprite } from './classes/Sprite.js';
 
 
-
 intitGame(960, 640);
 
 const cellSize = 64;
 const selectCards = [];
-
 
 let images = [];
 spriteSheets.forEach((ss) => {
