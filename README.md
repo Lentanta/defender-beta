@@ -9,6 +9,7 @@ Play it at https://lentanta.github.io/defender-beta/
 - [ ] Loading all resource when first start the game
 - [ ] Using OOP and some pattern
 - [ ] Mobile friendly
+- [ ] Implement typescript 
 
 ## Devlog
 ### Version 1.1.0
