@@ -7,30 +7,27 @@ import { Dimension } from "./classes/Dimension";
 import { Entity } from "./classes/Entity";
 import { Defender } from "./classes/Defender";
 import { Monster } from "./classes/Monster";
-
-// ===== CONSTANTS ===== //
-const UNIT_SIZE = 16;
-const SCALE = 4;
-
-const NUMBER_OF_HORIZONTAL_TILES = 15;
-const NUMBER_OF_VERTICAL_TILES = 10;
-
-const TILE_SIZE = UNIT_SIZE * SCALE;
-const CANVAS_WIDTH = TILE_SIZE * NUMBER_OF_HORIZONTAL_TILES;
-const CANVAS_HEIGHT = TILE_SIZE * NUMBER_OF_VERTICAL_TILES;
-
-const TOP_MENU_UI_WIDTH = TILE_SIZE * 3;
-const TOP_MENU_UI_HEIGHT = TILE_SIZE * 2;
-
-const CARD_UI_UNIT_WIDTH = UNIT_SIZE * 2;
-const CARD_UI_UNIT_HEIGHT = UNIT_SIZE * 2;
-
-const CARD_UI_WIDTH = TILE_SIZE * 2;
-const CARD_UI_HEIGHT = TILE_SIZE * 2;
+import {
+  CANVAS_HEIGHT,
+  CANVAS_WIDTH,
+  CARD_UI_HEIGHT,
+  CARD_UI_UNIT_HEIGHT,
+  CARD_UI_UNIT_WIDTH,
+  CARD_UI_WIDTH,
+  NUMBER_OF_HORIZONTAL_TILES,
+  NUMBER_OF_VERTICAL_TILES, TILE_SIZE,
+  TOP_MENU_UI_HEIGHT,
+  TOP_MENU_UI_WIDTH,
+  TYPE_1,
+  UNIT_SIZE
+} from "./utils/constants";
+import { Bullet } from "./classes/Bullet";
 
 // ===== GLOBAL STATE ===== //
 let grid: Entity[] = [];
 let monsters: Monster[] = [];
+let defenders: Defender[] = [];
+let bullets: Bullet[] = [];
 
 const createGrid = () => {
   let grid: any = [];
@@ -46,7 +43,6 @@ const createGrid = () => {
   })
   return grid;
 };
-
 
 const initialize = (ctx: CanvasRenderingContext2D) => {
   // Set background color
@@ -83,20 +79,41 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
     mouse.position.setPosition(-10, -10);
   });
 
-  const image = await loadImage("assets/machines.png");
+  canvas.addEventListener('click', () => {
+    for (let index = 0; index < monsters.length; index++) {
+      const monster = monsters[index];
+      if (collisionRect(mouse, monster)) {
+        monsters.splice(index, 1);
+        index -= 1;
+      }
+    };
+
+    for (let index = 0; index < grid.length; index++) {
+      const tile = grid[index];
+      if (collisionRect(mouse, tile)) {
+        const defender = new Defender(
+          TYPE_1,
+          new Position(tile.position.x, tile.position.y),
+          new Dimension(TILE_SIZE, TILE_SIZE),
+          new Entity(
+            new Position(tile.position.x, tile.position.y),
+            new Dimension(CANVAS_WIDTH, TILE_SIZE)),
+        );
+        console.log(defender)
+        defenders.push(defender);
+      }
+    }
+  });
+
   const informationUI = await loadImage("/assets/informationUI.png");
   const cardUI = await loadImage("/assets/cardUI.png");
+
+  const defendersImg = await loadImage("assets/machines.png");
   const monstersImg = await loadImage("/assets/monsters.png");
 
-  const defender = new Defender(
-    new Position(TILE_SIZE * 0, TILE_SIZE * 5),
-    new Dimension(TILE_SIZE, TILE_SIZE),
-    0
-  );
-
   let spawnMonsterTime = 0;
-
   let start: number | null = null;
+
   // ===== GAME LOOP ===== /
   const gameLoop = (timeStamp: number = 0) => {
     if (!start) { start = timeStamp };
@@ -104,7 +121,7 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
     let elapsed = (timeStamp - start) / 1000;
 
 
-    if (elapsed - spawnMonsterTime >= 3) {
+    if (elapsed - spawnMonsterTime >= 1) {
       console.log("SPAWN")
       const positionY = (Math.floor(Math.random() * 8 + 0) * TILE_SIZE) + TOP_MENU_UI_HEIGHT;
       const monster = new Monster(
@@ -119,7 +136,6 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
       new Position(0, 0),
       new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT)
     );
-
 
     ctx.fillStyle = "#EDB4A1";
     ctx.fillRect(
@@ -144,7 +160,7 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
 
     ctx.drawImage(informationUI,
       0, 0, (UNIT_SIZE * 3), (UNIT_SIZE * 2),
-      TILE_SIZE, 0,
+      0, 0,
       TOP_MENU_UI_WIDTH, TOP_MENU_UI_HEIGHT
     );
 
@@ -152,22 +168,71 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
     ctx.drawImage(cardUI,
       UNIT_SIZE * 0, 0,
       CARD_UI_UNIT_WIDTH, CARD_UI_UNIT_HEIGHT,
-      TILE_SIZE * 4, 0,
+      TILE_SIZE * 3, 0,
       CARD_UI_WIDTH, CARD_UI_HEIGHT
     );
-
-    defender.draw(ctx, image);
+    ctx.drawImage(cardUI,
+      UNIT_SIZE * 2, 0,
+      CARD_UI_UNIT_WIDTH, CARD_UI_UNIT_HEIGHT,
+      TILE_SIZE * 5, 0,
+      CARD_UI_WIDTH, CARD_UI_HEIGHT
+    );
+    ctx.drawImage(cardUI,
+      UNIT_SIZE * 6, 0,
+      CARD_UI_UNIT_WIDTH, CARD_UI_UNIT_HEIGHT,
+      TILE_SIZE * 7, 0,
+      CARD_UI_WIDTH, CARD_UI_HEIGHT
+    );
 
     // ==== UPDATE MONSTERS ==== //
     for (let index = 0; index < monsters.length; index++) {
       const monster = monsters[index];
       monster.move();
       monster.draw(ctx, monstersImg);
-      if (collisionRect(mouse, monster)) {
+
+      if (monster.health <= 0) {
         monsters.splice(index, 1);
-        index -= 1;
+        index--;
       }
     };
+
+    // ==== UPDATE DEFENDERS ==== //
+    for (let index = 0; index < defenders.length; index++) {
+      const defender = defenders[index];
+      defender.draw(ctx, defendersImg);
+      defender.update(timeStamp, () => {
+        bullets.push(new Bullet(
+          new Position(defender.position.x, defender.position.y),
+          new Dimension(32, 32)
+        ));
+      })
+
+      for (let index2 = 0; index2 < monsters.length; index2++) {
+        const monster = monsters[index2];
+        if (collisionRect(defender.shootArea, monster)) {
+          defender.isFire = true;
+          break;
+        } else {
+          defender.isFire = false;
+        }
+      }
+    };
+
+    // ==== UPDATE BULLETS ==== //
+    for (let index = 0; index < bullets.length; index++) {
+      const bullet = bullets[index];
+      bullet.update();
+      bullet.draw(ctx);
+
+      for (let index2 = 0; index2 < monsters.length; index2++) {
+        const monster = monsters[index2];
+        if (collisionRect(bullet, monster)) {
+          bullets.splice(index, 1);
+          index--;
+          monster.health -= bullet.damage;
+        }
+      }
+    }
 
     requestAnimationFrame(gameLoop)
   };

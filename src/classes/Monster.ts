@@ -1,5 +1,6 @@
 import { Position } from "./Position";
 import { Dimension } from "./Dimension";
+import { UNIT_SIZE } from "../utils/constants";
 
 export class Monster {
   position: Position;
@@ -24,7 +25,7 @@ export class Monster {
     ctx: CanvasRenderingContext2D,
     image: HTMLImageElement,
   ) {
-    const UNIT_SIZE = 16;
+
     ctx.drawImage(image,
       this.type * UNIT_SIZE, 0 * UNIT_SIZE,
       UNIT_SIZE, UNIT_SIZE,
