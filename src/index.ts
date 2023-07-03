@@ -7,6 +7,10 @@ import { Dimension } from "./classes/Dimension";
 import { Entity } from "./classes/Entity";
 import { Defender } from "./classes/Defender";
 import { Monster } from "./classes/Monster";
+import { Rectangle } from "./classes/Rectangle";
+
+import { GameObject } from "./classes/GameObject";
+
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
@@ -21,13 +25,20 @@ import {
   TYPE_1,
   UNIT_SIZE
 } from "./utils/constants";
-import { Bullet } from "./classes/Bullet";
+import { BulletObject } from "./classes/Bullet";
+import { Timer } from "./classes/Timer";
 
 // ===== GLOBAL STATE ===== //
 let grid: Entity[] = [];
 let monsters: Monster[] = [];
 let defenders: Defender[] = [];
-let bullets: Bullet[] = [];
+
+let gameObjects: GameObject[] = [];
+
+const informationUI = await loadImage("/assets/informationUI.png");
+const cardUI = await loadImage("/assets/cardUI.png");
+const defendersImg = await loadImage("assets/machines.png");
+const monstersImg = await loadImage("/assets/monsters.png");
 
 const createGrid = () => {
   let grid: any = [];
@@ -44,18 +55,20 @@ const createGrid = () => {
   return grid;
 };
 
+const setBackgroundColor = (ctx: CanvasRenderingContext2D) => {
+  const background = new Rectangle(0, 0,
+    CANVAS_WIDTH, CANVAS_HEIGHT);
+
+  ctx.fillStyle = "#EDB4A1";
+  ctx.fillRect(
+    background.position.x, background.position.y,
+    background.dimension.width,
+    background.dimension.height);
+};
+
 const initialize = (ctx: CanvasRenderingContext2D) => {
-  // Set background color
-  if (ctx.fillStyle) {
-    const pos = { x: 0, y: 0 };
-    ctx.fillStyle = "#edb4a1";
-    ctx.fillRect(pos.x, pos.y, CANVAS_WIDTH, CANVAS_HEIGHT);
-  };
-
-  // For pixel art
-  ctx.imageSmoothingEnabled = false;
-
-  // create grid
+  setBackgroundColor(ctx);
+  ctx.imageSmoothingEnabled = false;  // For pixel art
   grid = createGrid();
 };
 
@@ -80,14 +93,6 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
   });
 
   canvas.addEventListener('click', () => {
-    for (let index = 0; index < monsters.length; index++) {
-      const monster = monsters[index];
-      if (collisionRect(mouse, monster)) {
-        monsters.splice(index, 1);
-        index -= 1;
-      }
-    };
-
     for (let index = 0; index < grid.length; index++) {
       const tile = grid[index];
       if (collisionRect(mouse, tile)) {
@@ -105,45 +110,25 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
     }
   });
 
-  const informationUI = await loadImage("/assets/informationUI.png");
-  const cardUI = await loadImage("/assets/cardUI.png");
+  let monsterSpawnTimer = new Timer(1);
 
-  const defendersImg = await loadImage("assets/machines.png");
-  const monstersImg = await loadImage("/assets/monsters.png");
-
-  let spawnMonsterTime = 0;
-  let start: number | null = null;
+  const spawnMonster = () => {
+    const positionY = (Math.floor(
+      Math.random() * 8 + 0) * TILE_SIZE) + TOP_MENU_UI_HEIGHT;
+    const monster = new Monster(
+      new Position(CANVAS_WIDTH, positionY),
+      new Dimension(TILE_SIZE, TILE_SIZE), 0,
+    );
+    gameObjects.push(monster);
+  };
 
   // ===== GAME LOOP ===== /
   const gameLoop = (timeStamp: number = 0) => {
-    if (!start) { start = timeStamp };
-
-    let elapsed = (timeStamp - start) / 1000;
-
-
-    if (elapsed - spawnMonsterTime >= 1) {
-      console.log("SPAWN")
-      const positionY = (Math.floor(Math.random() * 8 + 0) * TILE_SIZE) + TOP_MENU_UI_HEIGHT;
-      const monster = new Monster(
-        new Position(CANVAS_WIDTH, positionY),
-        new Dimension(TILE_SIZE, TILE_SIZE), 0,
-      );
-      monsters.push(monster);
-      spawnMonsterTime = elapsed;
+    if (monsterSpawnTimer.isTime(timeStamp)) {
+      spawnMonster()
     };
+    setBackgroundColor(ctx);
 
-    const rectangle = new Entity(
-      new Position(0, 0),
-      new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT)
-    );
-
-    ctx.fillStyle = "#EDB4A1";
-    ctx.fillRect(
-      rectangle.position.x || 0,
-      rectangle.position.y || 0,
-      rectangle.dimension.width,
-      rectangle.dimension.height
-    );
 
     // Mouse hover tile
     grid.forEach((tile: any) => {
@@ -184,16 +169,25 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
       CARD_UI_WIDTH, CARD_UI_HEIGHT
     );
 
-    // ==== UPDATE MONSTERS ==== //
-    for (let index = 0; index < monsters.length; index++) {
-      const monster = monsters[index];
-      monster.move();
-      monster.draw(ctx, monstersImg);
+    // ==== UPDATE OBJECTS ==== //
+    for (let indexA = 0; indexA < gameObjects.length; indexA++) {
+      const gameObjectA = gameObjects[indexA];
+      gameObjectA.update(timeStamp);
+      gameObjectA.draw(ctx, monstersImg);
 
-      if (monster.health <= 0) {
-        monsters.splice(index, 1);
-        index--;
-      }
+      // Remove object from array
+      if (gameObjectA.isDisabled()) {
+        gameObjects.splice(indexA, 1);
+      };
+
+      for (let indexB = 0; indexB < gameObjects.length; indexB++) {
+        const gameObjectB = gameObjects[indexB];
+        if (gameObjectA === gameObjectB) continue;
+
+        if (collisionRect(gameObjectA, gameObjectB)) {
+          gameObjectA.collide(gameObjectB);
+        };
+      };
     };
 
     // ==== UPDATE DEFENDERS ==== //
@@ -201,10 +195,10 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
       const defender = defenders[index];
       defender.draw(ctx, defendersImg);
       defender.update(timeStamp, () => {
-        bullets.push(new Bullet(
+        gameObjects.push(new BulletObject(
           new Position(defender.position.x, defender.position.y),
-          new Dimension(32, 32)
-        ));
+          new Dimension(TILE_SIZE, TILE_SIZE)
+        ))
       })
 
       for (let index2 = 0; index2 < monsters.length; index2++) {
@@ -217,22 +211,6 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
         }
       }
     };
-
-    // ==== UPDATE BULLETS ==== //
-    for (let index = 0; index < bullets.length; index++) {
-      const bullet = bullets[index];
-      bullet.update();
-      bullet.draw(ctx);
-
-      for (let index2 = 0; index2 < monsters.length; index2++) {
-        const monster = monsters[index2];
-        if (collisionRect(bullet, monster)) {
-          bullets.splice(index, 1);
-          index--;
-          monster.health -= bullet.damage;
-        }
-      }
-    }
 
     requestAnimationFrame(gameLoop)
   };
