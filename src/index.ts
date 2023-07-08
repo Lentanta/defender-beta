@@ -3,6 +3,7 @@ import { loadImage } from "./utils/loadImage";
 import { iterate2D } from "./utils/iterate2D";
 import { Position } from "./classes/Position";
 import { collisionRect } from "./utils/collision";
+
 import { Dimension } from "./classes/Dimension";
 import { Entity } from "./classes/Entity";
 import { Defender } from "./classes/Defender";
@@ -25,7 +26,7 @@ import {
   TYPE_1,
   UNIT_SIZE
 } from "./utils/constants";
-import { BulletObject } from "./classes/Bullet";
+import { NormalBullet } from "./classes/Bullet";
 import { Timer } from "./classes/Timer";
 
 // ===== GLOBAL STATE ===== //
@@ -33,7 +34,7 @@ let grid: Entity[] = [];
 let monsters: Monster[] = [];
 let defenders: Defender[] = [];
 
-let gameObjects: GameObject[] = [];
+let gameObjects: any[] = [];
 
 const informationUI = await loadImage("/assets/informationUI.png");
 const cardUI = await loadImage("/assets/cardUI.png");
@@ -176,7 +177,7 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
       gameObjectA.draw(ctx, monstersImg);
 
       // Remove object from array
-      if (gameObjectA.isDisabled()) {
+      if (gameObjectA.disabled) {
         gameObjects.splice(indexA, 1);
       };
 
@@ -193,11 +194,13 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
     // ==== UPDATE DEFENDERS ==== //
     for (let index = 0; index < defenders.length; index++) {
       const defender = defenders[index];
+
       defender.draw(ctx, defendersImg);
       defender.update(timeStamp, () => {
-        gameObjects.push(new BulletObject(
-          new Position(defender.position.x, defender.position.y),
-          new Dimension(TILE_SIZE, TILE_SIZE)
+        gameObjects.push(new NormalBullet(
+          new Position(defender.)
+          defender.position.y,
+          30, 30
         ))
       })
 

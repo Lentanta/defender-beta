@@ -9,3 +9,22 @@ export const collisionRect = (first: any, second: any) => {
     }
     return false;
 };
+
+export const isRectangleCollideRectangle = (
+    firstX: number,
+    firstY: number,
+    firstWidth: number,
+    firstHeight: number,
+    secondX: number,
+    secondY: number,
+    secondWidth: number,
+    secondHeight: number
+) => {
+    if (
+        firstX < secondX + secondWidth &&
+        firstY < secondY + secondHeight &&
+        firstX + firstWidth > secondX &&
+        firstY + firstHeight > secondY
+    ) return true
+    return false;
+};

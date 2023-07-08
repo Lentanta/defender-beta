@@ -1,17 +1,15 @@
-import { Dimension } from "./Dimension";
 import { Position } from "./Position";
+import { Dimension } from "./Dimension";
 
 export class Rectangle {
   position: Position;
   dimension: Dimension;
 
   constructor(
-    x: number,
-    y: number,
-    width: number,
-    height: number,
+    position: Position,
+    dimension: Dimension
   ) {
-    this.position = new Position(x, y);
-    this.dimension = new Dimension(width, height);
-  }
+    this.position = position;
+    this.dimension = dimension;
+  };
 };

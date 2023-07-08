@@ -1,10 +1,9 @@
 import { Position } from "./Position";
 import { Dimension } from "./Dimension";
 import { CANVAS_WIDTH, UNIT_SIZE } from "../utils/constants";
-import { GameObject } from "./GameObject";
-import { isBulletObject } from "./Bullet";
+import { isBullet } from "./Bullet";
 
-export class Monster implements GameObject {
+export class Monster  {
   position: Position;
   dimension: Dimension;
   type: number;
@@ -42,22 +41,18 @@ export class Monster implements GameObject {
     this.position.x -= this.speed;
   };
 
-  update(timeStamp: number): void {
+  update(): void {
     if (this.position.x < CANVAS_WIDTH / 2) {
       this.disabled = true;
     }
     this.move();
   };
 
-  collide(gameObject: GameObject): void {
+  collide(gameObject: any): void {
     if (this.disabled) return;
+    if (isBullet(gameObject)) {
 
-    if (isBulletObject(gameObject)) {
-      this.disabled = true;
     };
   }
 
-  isDisabled(): boolean {
-    return this.disabled;
-  }
 }
