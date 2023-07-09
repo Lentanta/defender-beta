@@ -12,6 +12,8 @@ export interface Bullet extends
   VisibleObject,
   MovingObject,
   GameObject {
+  position: Position;
+  dimension: Dimension;
   damage: number;
 }
 

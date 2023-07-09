@@ -17,6 +17,7 @@ export interface Defender extends
   isFire: boolean;
   delayTime: number;
   startFireTime: number | null;
+  reset: () => void;
 };
 
 export class DefenderGun implements Defender {
@@ -55,7 +56,13 @@ export class DefenderGun implements Defender {
     this.startFireTime = null;
   };
 
+  reset(){
+
+  }
+
   update(timeStamp: number) {
+    if (this.health <= 0) this.disabled = true;
+
     if (!this.startFireTime) { this.startFireTime = timeStamp };
     let elapsed = (timeStamp - this.startFireTime) / 1000;
 
@@ -67,18 +74,22 @@ export class DefenderGun implements Defender {
   };
 
   draw(ctx: CanvasRenderingContext2D) {
-    // ctx.fillStyle = 'cyan';
-    // ctx.fillRect(
-    //   this.shootArea.position.x, this.shootArea.position.y,
-    //   this.shootArea.dimension.width, this.dimension.height
-    // );
-
-    // 1 is defender type
     ctx.drawImage(this.sprite,
       this.type * UNIT_SIZE, 0 * UNIT_SIZE,
       UNIT_SIZE, UNIT_SIZE,
       this.position.x, this.position.y,
       this.dimension.width, this.dimension.height
     )
+  };
+
+  collide(object: any) {
+    // if (!this.disabled) {
+    //   object.speed = 0;
+    //   this.health -= 2;
+    // };
+
+    // if (this.disabled) {
+      this.health -= 2;
+    // };
   };
 }

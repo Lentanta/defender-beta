@@ -1,34 +1,39 @@
 import { Position } from "./Position";
 import { Dimension } from "./Dimension";
-import { CANVAS_WIDTH, UNIT_SIZE } from "../utils/constants";
-import { isBullet } from "./Bullet";
+import { UNIT_SIZE } from "../utils/constants";
 
-export class Monster  {
+export class Monster {
   position: Position;
   dimension: Dimension;
   type: number;
   health: number;
   speed: number;
-
+  sprite: HTMLImageElement;
   disabled: boolean;
 
   constructor(
     position: Position,
     dimension: Dimension,
     type: number,
+    sprite: HTMLImageElement
   ) {
     this.position = position;
     this.dimension = dimension;
     this.type = type;
+    this.sprite = sprite;
     this.health = 100;
-    this.speed = 0.4;
+    this.speed = 1;
 
     this.disabled = false;
   };
 
-  draw(ctx: CanvasRenderingContext2D, image: HTMLImageElement) {
+  reset(){
+    this.speed = 1;
+  }
+
+  draw(ctx: CanvasRenderingContext2D) {
     if (!this.disabled) {
-      ctx.drawImage(image,
+      ctx.drawImage(this.sprite,
         this.type * UNIT_SIZE, 0 * UNIT_SIZE,
         UNIT_SIZE, UNIT_SIZE,
         this.position.x, this.position.y,
@@ -42,17 +47,15 @@ export class Monster  {
   };
 
   update(): void {
-    if (this.position.x < CANVAS_WIDTH / 2) {
-      this.disabled = true;
-    }
+    if (this.health <= 0) this.disabled = true;
+    if (this.position.x < 0) this.disabled = true;
+
     this.move();
   };
 
   collide(gameObject: any): void {
-    if (this.disabled) return;
-    if (isBullet(gameObject)) {
-
+    if (gameObject.type && !gameObject.disabled) {
+      this.speed = 0;
     };
-  }
-
+  };
 }

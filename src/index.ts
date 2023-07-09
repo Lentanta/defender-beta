@@ -2,15 +2,12 @@ import DuckEngine from "./duckEngine";
 import { loadImage } from "./utils/loadImage";
 import { iterate2D } from "./utils/iterate2D";
 import { Position } from "./classes/Position";
-import { collisionRect } from "./utils/collision";
+import { collisionRect, isRectangleCollideRectangle } from "./utils/collision";
 
 import { Dimension } from "./classes/Dimension";
 import { Entity } from "./classes/Entity";
-import { Defender } from "./classes/Defender";
+import { DefenderGun } from "./classes/Defender";
 import { Monster } from "./classes/Monster";
-import { Rectangle } from "./classes/Rectangle";
-
-import { GameObject } from "./classes/GameObject";
 
 import {
   CANVAS_HEIGHT,
@@ -30,15 +27,11 @@ import { NormalBullet } from "./classes/Bullet";
 import { Timer } from "./classes/Timer";
 
 // ===== GLOBAL STATE ===== //
-let grid: Entity[] = [];
-let monsters: Monster[] = [];
-let defenders: Defender[] = [];
-
-let gameObjects: any[] = [];
-
+let grid: { position: Position, dimension: Dimension }[] = [];
+let gameObjects: Array<DefenderGun | Monster> = [];
 const informationUI = await loadImage("/assets/informationUI.png");
 const cardUI = await loadImage("/assets/cardUI.png");
-const defendersImg = await loadImage("assets/machines.png");
+const defendersSprite = await loadImage("assets/machines.png");
 const monstersImg = await loadImage("/assets/monsters.png");
 
 const createGrid = () => {
@@ -47,18 +40,21 @@ const createGrid = () => {
     const posX = x * TILE_SIZE;
     const posY = TOP_MENU_UI_HEIGHT + (y * TILE_SIZE);
 
-    const tile = new Entity(
-      new Position(posX, posY),
-      new Dimension(TILE_SIZE, TILE_SIZE)
-    );
+    const tile = {
+      position: new Position(posX, posY),
+      dimension: new Dimension(TILE_SIZE, TILE_SIZE)
+    }
+
     grid.push(tile)
   })
   return grid;
 };
 
 const setBackgroundColor = (ctx: CanvasRenderingContext2D) => {
-  const background = new Rectangle(0, 0,
-    CANVAS_WIDTH, CANVAS_HEIGHT);
+  const background = {
+    position: new Position(0, 0),
+    dimension: new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT)
+  };
 
   ctx.fillStyle = "#EDB4A1";
   ctx.fillRect(
@@ -96,17 +92,12 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
   canvas.addEventListener('click', () => {
     for (let index = 0; index < grid.length; index++) {
       const tile = grid[index];
+      const position = new Position(tile.position.x, tile.position.y);
+      const dimension = new Dimension(TILE_SIZE, TILE_SIZE);
+
       if (collisionRect(mouse, tile)) {
-        const defender = new Defender(
-          TYPE_1,
-          new Position(tile.position.x, tile.position.y),
-          new Dimension(TILE_SIZE, TILE_SIZE),
-          new Entity(
-            new Position(tile.position.x, tile.position.y),
-            new Dimension(CANVAS_WIDTH, TILE_SIZE)),
-        );
-        console.log(defender)
-        defenders.push(defender);
+        const defender = new DefenderGun(TYPE_1, position, dimension, defendersSprite);
+        gameObjects.push(defender)
       }
     }
   });
@@ -119,6 +110,7 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
     const monster = new Monster(
       new Position(CANVAS_WIDTH, positionY),
       new Dimension(TILE_SIZE, TILE_SIZE), 0,
+      monstersImg
     );
     gameObjects.push(monster);
   };
@@ -129,7 +121,6 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
       spawnMonster()
     };
     setBackgroundColor(ctx);
-
 
     // Mouse hover tile
     grid.forEach((tile: any) => {
@@ -150,70 +141,53 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
       TOP_MENU_UI_WIDTH, TOP_MENU_UI_HEIGHT
     );
 
+    for (let i = 0; i < gameObjects.length; i++) {
+      const objectI = gameObjects[i];
+      objectI.reset();
+
+      for (let j = 0; j < gameObjects.length; j++) {
+        const objectJ = gameObjects[j];
+        if (objectI === objectJ) continue;
+        const isCollide = isRectangleCollideRectangle(
+          objectI.position.x, objectI.position.y,
+          objectI.dimension.width,
+          objectI.dimension.height,
+          objectJ.position.x, objectJ.position.y,
+          objectJ.dimension.width,
+          objectJ.dimension.height
+        );
+        if (isCollide) { objectI.collide(objectJ) }
+      };
+
+      if (objectI.disabled) {
+        gameObjects.splice(i, 1);
+        i -= 1;
+      };
+
+      objectI.update(timeStamp);
+      objectI.draw(ctx);
+
+    };
+
     // ==== Render Card UI ==== //
-    ctx.drawImage(cardUI,
-      UNIT_SIZE * 0, 0,
-      CARD_UI_UNIT_WIDTH, CARD_UI_UNIT_HEIGHT,
-      TILE_SIZE * 3, 0,
-      CARD_UI_WIDTH, CARD_UI_HEIGHT
-    );
-    ctx.drawImage(cardUI,
-      UNIT_SIZE * 2, 0,
-      CARD_UI_UNIT_WIDTH, CARD_UI_UNIT_HEIGHT,
-      TILE_SIZE * 5, 0,
-      CARD_UI_WIDTH, CARD_UI_HEIGHT
-    );
-    ctx.drawImage(cardUI,
-      UNIT_SIZE * 6, 0,
-      CARD_UI_UNIT_WIDTH, CARD_UI_UNIT_HEIGHT,
-      TILE_SIZE * 7, 0,
-      CARD_UI_WIDTH, CARD_UI_HEIGHT
-    );
-
-    // ==== UPDATE OBJECTS ==== //
-    for (let indexA = 0; indexA < gameObjects.length; indexA++) {
-      const gameObjectA = gameObjects[indexA];
-      gameObjectA.update(timeStamp);
-      gameObjectA.draw(ctx, monstersImg);
-
-      // Remove object from array
-      if (gameObjectA.disabled) {
-        gameObjects.splice(indexA, 1);
-      };
-
-      for (let indexB = 0; indexB < gameObjects.length; indexB++) {
-        const gameObjectB = gameObjects[indexB];
-        if (gameObjectA === gameObjectB) continue;
-
-        if (collisionRect(gameObjectA, gameObjectB)) {
-          gameObjectA.collide(gameObjectB);
-        };
-      };
-    };
-
-    // ==== UPDATE DEFENDERS ==== //
-    for (let index = 0; index < defenders.length; index++) {
-      const defender = defenders[index];
-
-      defender.draw(ctx, defendersImg);
-      defender.update(timeStamp, () => {
-        gameObjects.push(new NormalBullet(
-          new Position(defender.)
-          defender.position.y,
-          30, 30
-        ))
-      })
-
-      for (let index2 = 0; index2 < monsters.length; index2++) {
-        const monster = monsters[index2];
-        if (collisionRect(defender.shootArea, monster)) {
-          defender.isFire = true;
-          break;
-        } else {
-          defender.isFire = false;
-        }
-      }
-    };
+    // ctx.drawImage(cardUI,
+    //   UNIT_SIZE * 0, 0,
+    //   CARD_UI_UNIT_WIDTH, CARD_UI_UNIT_HEIGHT,
+    //   TILE_SIZE * 3, 0,
+    //   CARD_UI_WIDTH, CARD_UI_HEIGHT
+    // );
+    // ctx.drawImage(cardUI,
+    //   UNIT_SIZE * 2, 0,
+    //   CARD_UI_UNIT_WIDTH, CARD_UI_UNIT_HEIGHT,
+    //   TILE_SIZE * 5, 0,
+    //   CARD_UI_WIDTH, CARD_UI_HEIGHT
+    // );
+    // ctx.drawImage(cardUI,
+    //   UNIT_SIZE * 6, 0,
+    //   CARD_UI_UNIT_WIDTH, CARD_UI_UNIT_HEIGHT,
+    //   TILE_SIZE * 7, 0,
+    //   CARD_UI_WIDTH, CARD_UI_HEIGHT
+    // );
 
     requestAnimationFrame(gameLoop)
   };
