@@ -21,24 +21,26 @@ export class NormalBullet implements Bullet {
   position: Position;
   dimension: Dimension;
 
-  type: string;
   disabled: boolean;
   speed: number;
   damage: number;
+  bullet: true = true;
 
   constructor(
-    dimension: Dimension,
     position: Position,
+    dimension: Dimension
   ) {
-    this.type = "bullet";
-
     this.position = position;
     this.dimension = dimension;
 
-    this.damage = 50;
+    this.damage = 5;
     this.speed = 5;
 
     this.disabled = false;
+  }
+
+  reset() {
+
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -58,8 +60,10 @@ export class NormalBullet implements Bullet {
     this.position.x += this.speed;
   };
 
-  collide<CollisionObject>(object: CollisionObject) {
-    console.log("BULLET: ", object);
+  collide(object: any) {
+    if(object.monster){
+      this.disabled = true;
+    }
   };
 };
 

@@ -6,6 +6,7 @@ import {
 } from "../Interfaces"
 import { Position } from "./Position";
 import { Dimension } from "./Dimension";
+import { Timer } from "./Timer";
 
 export interface Defender extends
   GameObject,
@@ -15,8 +16,7 @@ export interface Defender extends
   position: Position;
   dimension: Dimension;
   isFire: boolean;
-  delayTime: number;
-  startFireTime: number | null;
+  fireTimer: Timer;
   reset: () => void;
 };
 
@@ -29,11 +29,10 @@ export class DefenderGun implements Defender {
   isAlive: boolean;
 
   type: number;
+  sprite: HTMLImageElement;
 
   isFire: boolean;
-  delayTime: number;
-  startFireTime: number | null;
-  sprite: HTMLImageElement;
+  fireTimer: Timer;
 
   constructor(
     type: number,
@@ -50,26 +49,22 @@ export class DefenderGun implements Defender {
     this.health = 100;
 
     this.sprite = sprite;
-    this.isFire = true;
 
-    this.delayTime = 0;
-    this.startFireTime = null;
+    this.isFire = false;
+    this.fireTimer = new Timer(0.2);
   };
 
-  reset(){
-
+  reset() {
+    // this.isFire = false;
   }
 
   update(timeStamp: number) {
     if (this.health <= 0) this.disabled = true;
+  };
 
-    if (!this.startFireTime) { this.startFireTime = timeStamp };
-    let elapsed = (timeStamp - this.startFireTime) / 1000;
-
-    if (this.isFire) {
-      if (elapsed - this.delayTime > 2) {
-        this.delayTime = elapsed;
-      }
+  fire(timeStamp: number, callback: () => void) {
+    if (this.isFire && this.fireTimer.isTime(timeStamp)) {
+      callback()
     };
   };
 
@@ -83,13 +78,8 @@ export class DefenderGun implements Defender {
   };
 
   collide(object: any) {
-    // if (!this.disabled) {
-    //   object.speed = 0;
-    //   this.health -= 2;
-    // };
-
-    // if (this.disabled) {
+    if (object.monster) {
       this.health -= 2;
-    // };
+    };
   };
 }

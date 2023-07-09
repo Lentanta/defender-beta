@@ -14,7 +14,7 @@ export class Timer {
   };
 
   isTime(timeStamp: number): boolean {
-    if (!this.startTime) { this.startTime = timeStamp };
+    if (!this.startTime) { this.startTime = 0 };
     
     let elapsed = (timeStamp - this.startTime) / ONE_SECOND;
     if (elapsed - this.tempTime >= this.delaySecond) {

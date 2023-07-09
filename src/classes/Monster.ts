@@ -10,6 +10,7 @@ export class Monster {
   speed: number;
   sprite: HTMLImageElement;
   disabled: boolean;
+  monster: true;
 
   constructor(
     position: Position,
@@ -22,12 +23,13 @@ export class Monster {
     this.type = type;
     this.sprite = sprite;
     this.health = 100;
+    this.monster = true;
     this.speed = 1;
 
     this.disabled = false;
   };
 
-  reset(){
+  reset() {
     this.speed = 1;
   }
 
@@ -57,5 +59,9 @@ export class Monster {
     if (gameObject.type && !gameObject.disabled) {
       this.speed = 0;
     };
+
+    if (gameObject.bullet) {
+      this.health -= gameObject.damage;
+    }
   };
 }

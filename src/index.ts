@@ -25,14 +25,22 @@ import {
 } from "./utils/constants";
 import { NormalBullet } from "./classes/Bullet";
 import { Timer } from "./classes/Timer";
+import { FireArea } from "./classes/ShootArea";
 
 // ===== GLOBAL STATE ===== //
+type GameObject = DefenderGun | Monster | FireArea | NormalBullet
 let grid: { position: Position, dimension: Dimension }[] = [];
-let gameObjects: Array<DefenderGun | Monster> = [];
+let gameObjects: Array<GameObject> = [];
+
 const informationUI = await loadImage("/assets/informationUI.png");
 const cardUI = await loadImage("/assets/cardUI.png");
 const defendersSprite = await loadImage("assets/machines.png");
 const monstersImg = await loadImage("/assets/monsters.png");
+
+export function isDefenderGun(object: GameObject): object is DefenderGun {
+  return "disabled" in object
+    && "isFire" in object
+};
 
 const createGrid = () => {
   let grid: any = [];
@@ -92,12 +100,31 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
   canvas.addEventListener('click', () => {
     for (let index = 0; index < grid.length; index++) {
       const tile = grid[index];
-      const position = new Position(tile.position.x, tile.position.y);
-      const dimension = new Dimension(TILE_SIZE, TILE_SIZE);
+      const defenderPosition = new Position(tile.position.x, tile.position.y);
+      const defenderDimension = new Dimension(TILE_SIZE, TILE_SIZE);
+      const fireAreaPosition = new Position(
+        defenderPosition.x + defenderDimension.width,
+        defenderPosition.y
+      );
+      const fireAreaDimension = new Dimension(
+        TILE_SIZE * 2,
+        TILE_SIZE,
+      )
 
       if (collisionRect(mouse, tile)) {
-        const defender = new DefenderGun(TYPE_1, position, dimension, defendersSprite);
-        gameObjects.push(defender)
+        const defender = new DefenderGun(
+          TYPE_1,
+          defenderPosition,
+          defenderDimension,
+          defendersSprite
+        );
+        const fireArea = new FireArea(
+          defender,
+          fireAreaPosition,
+          fireAreaDimension
+        )
+        gameObjects.push(defender);
+        gameObjects.push(fireArea);
       }
     }
   });
@@ -145,18 +172,19 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
       const objectI = gameObjects[i];
       objectI.reset();
 
+      // Collision detect
       for (let j = 0; j < gameObjects.length; j++) {
         const objectJ = gameObjects[j];
         if (objectI === objectJ) continue;
-        const isCollide = isRectangleCollideRectangle(
+
+        if (isRectangleCollideRectangle(
           objectI.position.x, objectI.position.y,
           objectI.dimension.width,
           objectI.dimension.height,
           objectJ.position.x, objectJ.position.y,
           objectJ.dimension.width,
           objectJ.dimension.height
-        );
-        if (isCollide) { objectI.collide(objectJ) }
+        )) { objectI.collide(objectJ) };
       };
 
       if (objectI.disabled) {
@@ -164,9 +192,20 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
         i -= 1;
       };
 
+      if (isDefenderGun(objectI)) {
+        objectI.fire(timeStamp, () => {
+          const bullet = new NormalBullet(
+            new Position(
+              objectI.position.x + objectI.dimension.width,
+              objectI.position.y),
+            new Dimension(30, 20)
+          );
+          gameObjects.push(bullet)
+        });
+      };
+
       objectI.update(timeStamp);
       objectI.draw(ctx);
-
     };
 
     // ==== Render Card UI ==== //
