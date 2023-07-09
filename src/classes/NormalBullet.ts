@@ -9,7 +9,7 @@ export class NormalBullet implements Bullet {
   dimension: Dimension2D;
 
   speed: number = 5;
-  damage: number = 5;
+  damage: number = 20;
   isActive: boolean = true;
   type: string = "Bullet";
   bulletType: number = 1;

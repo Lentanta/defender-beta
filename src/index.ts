@@ -28,7 +28,7 @@ import {
   CARD_UI_UNIT_WIDTH,
   CARD_UI_WIDTH,
   NUMBER_OF_HORIZONTAL_TILES,
-  NUMBER_OF_VERTICAL_TILES, TILE_SIZE,
+  NUMBER_OF_VERTICAL_TILES, PIXEL_SIZE, SCALE, TILE_SIZE,
   TOP_MENU_UI_HEIGHT,
   TOP_MENU_UI_WIDTH,
   TYPE_1,
@@ -107,14 +107,19 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
       const tile = grid[index];
 
       const defenderPosition = new Position2D(
-        tile.position.x, tile.position.y);
+        tile.position.x, tile.position.y
+      );
       const defenderDimension = new Dimension2D(
-        TILE_SIZE, TILE_SIZE);
+        TILE_SIZE, TILE_SIZE
+      );
       const fireAreaPosition = new Position2D(
         defenderPosition.x + defenderDimension.width,
-        defenderPosition.y);
+        defenderPosition.y
+      );
       const fireAreaDimension = new Dimension2D(
-        TILE_SIZE * 2, TILE_SIZE);
+        CANVAS_WIDTH - (defenderPosition.x + TILE_SIZE),
+        TILE_SIZE
+      );
 
       if (collisionRect(mouse, tile)) {
         const defender = new DefenderGun(
@@ -206,9 +211,9 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
         gameObject.shot(timeStamp, () => {
           const bullet = new NormalBullet(
             new Position2D(
-              gameObject.position.x + gameObject.dimension.width,
-              gameObject.position.y),
-            new Dimension2D(20, 10)
+              gameObject.position.x + gameObject.dimension.width - (PIXEL_SIZE * 2),
+              gameObject.position.y + (PIXEL_SIZE * 4)),
+            new Dimension2D(PIXEL_SIZE * 3, PIXEL_SIZE * 3)
           );
           gameObjects.push(bullet)
         });

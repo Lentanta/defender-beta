@@ -1,9 +1,11 @@
 export const UNIT_SIZE = 16;
-export const SCALE = 5;
+
+export const SCALE = 4;
 
 export const NUMBER_OF_HORIZONTAL_TILES = 15;
 export const NUMBER_OF_VERTICAL_TILES = 10;
 
+export const PIXEL_SIZE = 1 * SCALE;
 export const TILE_SIZE = UNIT_SIZE * SCALE;
 export const CANVAS_WIDTH = TILE_SIZE * NUMBER_OF_HORIZONTAL_TILES;
 export const CANVAS_HEIGHT = TILE_SIZE * NUMBER_OF_VERTICAL_TILES;

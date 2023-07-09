@@ -3,14 +3,14 @@ import { Defender } from "../interfaces/Defender"
 import { Position2D } from "./Position2D";
 import { Dimension2D } from "./Dimension2D";
 import { Timer } from "./Timer";
+import { GameObject, isMonster } from "../interfaces/GameObject";
 
 export class DefenderGun implements Defender {
   position: Position2D;
   dimension: Dimension2D;
   sprite: HTMLImageElement;
 
-  disabled: boolean;
-  health: number = 100;
+  health: number = 10;
   maxHealth: number = 100;
   isAlive: boolean;
   reloadTime: number = 1;
@@ -30,17 +30,16 @@ export class DefenderGun implements Defender {
     this.position = position;
     this.dimension = dimension;
 
-    this.disabled = false;
     this.isAlive = true;
     this.health = 100;
 
     this.sprite = sprite;
-    this.fireTimer = new Timer(0.2);
+    this.fireTimer = new Timer(1);
   };
 
   update() {
     if (this.health <= 0)
-      this.disabled = true;
+      this.isActive = false;
   };
 
   shot(timeStamp: number, callback: () => void) {
@@ -58,10 +57,12 @@ export class DefenderGun implements Defender {
     )
   };
 
-  notCollided(): void { };
+  notCollided(): void { 
 
-  collided(object: any) {
-    if (object.monster) {
+  };
+
+  collided(object: GameObject) {
+    if (isMonster(object)) {
       this.health -= 2;
     };
   };
