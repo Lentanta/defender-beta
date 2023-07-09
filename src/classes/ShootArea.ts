@@ -1,29 +1,27 @@
-import { CollisionObject, GameObject, VisibleObject } from "../Interfaces";
-import { Defender } from "./Defender";
-import { Dimension } from "./Dimension";
-import { Position } from "./Position";
+import { CollisionArea } from "../interfaces/CollisionArea";
+import { Defender } from "../interfaces/Defender";
+import { GameObject, isMonster } from "../interfaces/GameObject";
+import { Dimension2D } from "./Dimension2D";
+import { Position2D } from "./Position2D";
 
-export class FireArea implements CollisionObject, GameObject, VisibleObject {
+export class ShootArea implements CollisionArea {
   defender: Defender;
-  position: Position;
-  dimension: Dimension;
+  position: Position2D;
+  dimension: Dimension2D;
 
-  disabled: boolean;
+  type: string = "CollisionArea";
+  isActive: boolean;
 
   constructor(
     defender: Defender,
-    position: Position,
-    dimension: Dimension
+    position: Position2D,
+    dimension: Dimension2D
   ) {
     this.defender = defender;
     this.position = position;
     this.dimension = dimension;
-    this.disabled = false;
-  }
-
-  reset() {
-    this.defender.isFire = false;
-  }
+    this.isActive = defender.isActive;
+  };
 
   draw(ctx: CanvasRenderingContext2D): void {
     ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
@@ -33,18 +31,15 @@ export class FireArea implements CollisionObject, GameObject, VisibleObject {
       this.dimension.width,
       this.dimension.height
     );
-  }
+  };
 
-  update(): void {
-    if (this.defender.disabled) {
-      this.disabled = true;
-    }
-  }
+  notCollided(): void {
+    this.defender.isShooting = false;
+  };
 
-  collide(object: any): void {
-    if(object.monster){
-      this.defender.isFire = true
+  collided(object: GameObject): void {
+    if (isMonster(object)) {
+      this.defender.isShooting = true;
     }
-    // this.defender.position.x += 1;
   }
 }

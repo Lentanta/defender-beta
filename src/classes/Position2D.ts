@@ -1,4 +1,4 @@
-export class Position {
+export class Position2D {
   x: number;
   y: number;
 
@@ -6,9 +6,4 @@ export class Position {
     this.x = x;
     this.y = y;
   };
-
-  setPosition(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  }
 };

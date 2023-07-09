@@ -1,13 +1,24 @@
 import DuckEngine from "./duckEngine";
+
+import {
+  GameObject,
+  isBullet,
+  isDefender,
+  isMonster
+} from "./interfaces/GameObject";
+import { Rectangle } from "./interfaces/Rectangle";
+
+import { Position2D } from "./classes/Position2D";
+import { Dimension2D } from "./classes/Dimension2D";
+import { DefenderGun } from "./classes/Defender";
+import { NormalMonster } from "./classes/NormalMonster";
+
+import {
+  collisionRect,
+  isRectangleCollideRectangle
+} from "./utils/collision";
 import { loadImage } from "./utils/loadImage";
 import { iterate2D } from "./utils/iterate2D";
-import { Position } from "./classes/Position";
-import { collisionRect, isRectangleCollideRectangle } from "./utils/collision";
-
-import { Dimension } from "./classes/Dimension";
-import { Entity } from "./classes/Entity";
-import { DefenderGun } from "./classes/Defender";
-import { Monster } from "./classes/Monster";
 
 import {
   CANVAS_HEIGHT,
@@ -23,13 +34,12 @@ import {
   TYPE_1,
   UNIT_SIZE
 } from "./utils/constants";
-import { NormalBullet } from "./classes/Bullet";
+import { NormalBullet } from "./classes/NormalBullet";
 import { Timer } from "./classes/Timer";
-import { FireArea } from "./classes/ShootArea";
+import { ShootArea } from "./classes/ShootArea";
 
 // ===== GLOBAL STATE ===== //
-type GameObject = DefenderGun | Monster | FireArea | NormalBullet
-let grid: { position: Position, dimension: Dimension }[] = [];
+let grid: Rectangle[] = [];
 let gameObjects: Array<GameObject> = [];
 
 const informationUI = await loadImage("/assets/informationUI.png");
@@ -37,20 +47,15 @@ const cardUI = await loadImage("/assets/cardUI.png");
 const defendersSprite = await loadImage("assets/machines.png");
 const monstersImg = await loadImage("/assets/monsters.png");
 
-export function isDefenderGun(object: GameObject): object is DefenderGun {
-  return "disabled" in object
-    && "isFire" in object
-};
-
 const createGrid = () => {
   let grid: any = [];
   iterate2D(NUMBER_OF_VERTICAL_TILES, NUMBER_OF_HORIZONTAL_TILES, (y, x) => {
     const posX = x * TILE_SIZE;
     const posY = TOP_MENU_UI_HEIGHT + (y * TILE_SIZE);
 
-    const tile = {
-      position: new Position(posX, posY),
-      dimension: new Dimension(TILE_SIZE, TILE_SIZE)
+    const tile: Rectangle = {
+      position: new Position2D(posX, posY),
+      dimension: new Dimension2D(TILE_SIZE, TILE_SIZE)
     }
 
     grid.push(tile)
@@ -60,13 +65,14 @@ const createGrid = () => {
 
 const setBackgroundColor = (ctx: CanvasRenderingContext2D) => {
   const background = {
-    position: new Position(0, 0),
-    dimension: new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT)
+    position: new Position2D(0, 0),
+    dimension: new Dimension2D(CANVAS_WIDTH, CANVAS_HEIGHT)
   };
 
   ctx.fillStyle = "#EDB4A1";
   ctx.fillRect(
-    background.position.x, background.position.y,
+    background.position.x,
+    background.position.y,
     background.dimension.width,
     background.dimension.height);
 };
@@ -81,44 +87,42 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
   initialize(ctx);
 
   let canvasPosition = canvas.getBoundingClientRect();
-  let mouse = new Entity(
-    new Position(-10, -10),
-    new Dimension(0.1, 0.1)
-  );
+  let mouse: Rectangle = {
+    position: new Position2D(-10, -10),
+    dimension: new Dimension2D(0.1, 0.1)
+  };
 
   canvas.addEventListener('mousemove', (event) => {
-    mouse.position.setPosition(
-      event.x - canvasPosition.left,
-      event.y - canvasPosition.top
-    );
+    mouse.position.x = event.x - canvasPosition.left;
+    mouse.position.y = event.y - canvasPosition.top;
   });
 
   canvas.addEventListener('mouseleave', () => {
-    mouse.position.setPosition(-10, -10);
+    mouse.position.x = -10;
+    mouse.position.y = -10;
   });
 
   canvas.addEventListener('click', () => {
     for (let index = 0; index < grid.length; index++) {
       const tile = grid[index];
-      const defenderPosition = new Position(tile.position.x, tile.position.y);
-      const defenderDimension = new Dimension(TILE_SIZE, TILE_SIZE);
-      const fireAreaPosition = new Position(
+
+      const defenderPosition = new Position2D(
+        tile.position.x, tile.position.y);
+      const defenderDimension = new Dimension2D(
+        TILE_SIZE, TILE_SIZE);
+      const fireAreaPosition = new Position2D(
         defenderPosition.x + defenderDimension.width,
-        defenderPosition.y
-      );
-      const fireAreaDimension = new Dimension(
-        TILE_SIZE * 2,
-        TILE_SIZE,
-      )
+        defenderPosition.y);
+      const fireAreaDimension = new Dimension2D(
+        TILE_SIZE * 2, TILE_SIZE);
 
       if (collisionRect(mouse, tile)) {
         const defender = new DefenderGun(
-          TYPE_1,
           defenderPosition,
           defenderDimension,
           defendersSprite
         );
-        const fireArea = new FireArea(
+        const fireArea = new ShootArea(
           defender,
           fireAreaPosition,
           fireAreaDimension
@@ -134,9 +138,9 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
   const spawnMonster = () => {
     const positionY = (Math.floor(
       Math.random() * 8 + 0) * TILE_SIZE) + TOP_MENU_UI_HEIGHT;
-    const monster = new Monster(
-      new Position(CANVAS_WIDTH, positionY),
-      new Dimension(TILE_SIZE, TILE_SIZE), 0,
+    const monster = new NormalMonster(
+      new Position2D(CANVAS_WIDTH, positionY),
+      new Dimension2D(TILE_SIZE, TILE_SIZE),
       monstersImg
     );
     gameObjects.push(monster);
@@ -170,7 +174,7 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
 
     for (let i = 0; i < gameObjects.length; i++) {
       const objectI = gameObjects[i];
-      objectI.reset();
+      objectI.notCollided();
 
       // Collision detect
       for (let j = 0; j < gameObjects.length; j++) {
@@ -184,28 +188,39 @@ DuckEngine(CANVAS_WIDTH, CANVAS_HEIGHT, async (ctx, canvas) => {
           objectJ.position.x, objectJ.position.y,
           objectJ.dimension.width,
           objectJ.dimension.height
-        )) { objectI.collide(objectJ) };
+        )) {
+          objectI.collided(objectJ)
+        };
       };
+    };
 
-      if (objectI.disabled) {
+    for (let i = 0; i < gameObjects.length; i++) {
+      const gameObject = gameObjects[i];
+
+      if (!gameObject.isActive) {
         gameObjects.splice(i, 1);
         i -= 1;
       };
 
-      if (isDefenderGun(objectI)) {
-        objectI.fire(timeStamp, () => {
+      if (isDefender(gameObject)) {
+        gameObject.shot(timeStamp, () => {
           const bullet = new NormalBullet(
-            new Position(
-              objectI.position.x + objectI.dimension.width,
-              objectI.position.y),
-            new Dimension(30, 20)
+            new Position2D(
+              gameObject.position.x + gameObject.dimension.width,
+              gameObject.position.y),
+            new Dimension2D(20, 10)
           );
           gameObjects.push(bullet)
         });
       };
 
-      objectI.update(timeStamp);
-      objectI.draw(ctx);
+      if (isDefender(gameObject)
+        || isMonster(gameObject)
+        || isBullet(gameObject)) {
+        gameObject.update(timeStamp);
+      };
+
+      gameObject.draw(ctx);
     };
 
     // ==== Render Card UI ==== //

@@ -1,4 +1,4 @@
-export class Dimension {
+export class Dimension2D {
   width: number;
   height: number;
 
