@@ -104,19 +104,9 @@ duckEngine.mouseClick(() => {
     const tile = grid[index];
 
     const defenderPosition = new Position2D(
-      tile.position.x, tile.position.y
-    );
+      tile.position.x, tile.position.y);
     const defenderDimension = new Dimension2D(
-      TILE_SIZE, TILE_SIZE
-    );
-    const fireAreaPosition = new Position2D(
-      defenderPosition.x + defenderDimension.width,
-      defenderPosition.y
-    );
-    const fireAreaDimension = new Dimension2D(
-      CANVAS_WIDTH - (defenderPosition.x + TILE_SIZE),
-      TILE_SIZE
-    );
+      TILE_SIZE, TILE_SIZE);
 
     if (collisionRect(mouse, tile)) {
       const defender = new DefenderGun(
@@ -124,17 +114,10 @@ duckEngine.mouseClick(() => {
         defenderDimension,
         defendersSprite
       );
-      const fireArea = new ShootArea(
-        defender,
-        fireAreaPosition,
-        fireAreaDimension
-      )
       gom.add(defender);
-      gom.add(fireArea);
-    }
+      gom.add(defender.ShootArea);
+    };
   }
-
-  console.log(gom.gameObjects)
 });
 
 duckEngine.initialize((ctx) => {

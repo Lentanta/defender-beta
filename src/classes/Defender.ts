@@ -1,9 +1,11 @@
-import { UNIT_SIZE } from "../utils/constants";
+import { CANVAS_WIDTH, UNIT_SIZE } from "../utils/constants";
 import { Defender } from "../interfaces/Defender"
+import { GameObject, isMonster } from "../interfaces/GameObject";
+
 import { Position2D } from "./Position2D";
 import { Dimension2D } from "./Dimension2D";
 import { Timer } from "./Timer";
-import { GameObject, isMonster } from "../interfaces/GameObject";
+import { ShootArea } from "./ShootArea";
 
 export class DefenderGun implements Defender {
   position: Position2D;
@@ -18,9 +20,10 @@ export class DefenderGun implements Defender {
 
   type: string = "Defender";
   defenderType: number = 1;
-  isShooting: boolean = false;
 
-  fireTimer: Timer;
+  ShootArea: ShootArea;
+  isShooting: boolean = false;
+  shootTimer: Timer;
 
   constructor(
     position: Position2D,
@@ -34,16 +37,29 @@ export class DefenderGun implements Defender {
     this.health = 100;
 
     this.sprite = sprite;
-    this.fireTimer = new Timer(1);
+    this.shootTimer = new Timer(1);
+
+    this.ShootArea = new ShootArea(this,
+      new Position2D(
+        position.x + dimension.width,
+        position.y
+      ),
+      new Dimension2D(
+        CANVAS_WIDTH - (position.x + dimension.width),
+        dimension.height
+      )
+    );
   };
 
   update() {
-    if (this.health <= 0)
+    if (this.health <= 0) {
       this.isActive = false;
+      this.ShootArea.isActive = false;
+    }
   };
 
   shot(timeStamp: number, callback: () => void) {
-    if (this.isShooting && this.fireTimer.isTime(timeStamp)) {
+    if (this.isShooting && this.shootTimer.isTime(timeStamp)) {
       callback()
     };
   };
@@ -57,7 +73,7 @@ export class DefenderGun implements Defender {
     )
   };
 
-  notCollided(): void { 
+  notCollided(): void {
 
   };
 

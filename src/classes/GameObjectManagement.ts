@@ -39,7 +39,6 @@ export class GameObjectManagement {
           objectJ.dimension.width,
           objectJ.dimension.height
         )) {
-          console.log("HELLO")
           objectI.collided(objectJ)
         };
       };
