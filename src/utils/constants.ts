@@ -1,6 +1,6 @@
 export const UNIT_SIZE = 16;
 
-export const SCALE = 4;
+export const SCALE = 3;
 
 export const NUMBER_OF_HORIZONTAL_TILES = 15;
 export const NUMBER_OF_VERTICAL_TILES = 10;

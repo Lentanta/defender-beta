@@ -4,9 +4,7 @@ export const collisionRect = (first: any, second: any) => {
         first.position.x + first.dimension.width > second.position.x &&
         first.position.y < second.position.y + second.dimension.height &&
         first.position.y + first.dimension.height > second.position.y
-    ) {
-        return true;
-    }
+    ) return true;
     return false;
 };
 

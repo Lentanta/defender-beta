@@ -1,16 +1,47 @@
-const duckEngine = (
-  canvasWidth: number,
-  canvasHeight: number,
-  callback: (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void) => {
-    
-  let canvas = document.createElement('canvas');
-  let ctx = canvas.getContext('2d') || new CanvasRenderingContext2D();
+export class DuckEngine {
+  canvasWidth: number;
+  canvasHeight: number;
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  global: Record<string, any> = {};
 
-  canvas.width = canvasWidth;
-  canvas.height = canvasHeight;
+  constructor(canvasWidth: number, canvasHeight: number) {
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
 
-  callback(ctx, canvas)
-  document.body.appendChild(canvas);
-};
+    const canvas = document.createElement('canvas');
+    this.canvas = canvas;
+    this.canvas.width = canvasWidth;
+    this.canvas.height = canvasHeight;
 
-export default duckEngine;
+    this.ctx = canvas.getContext('2d') || new CanvasRenderingContext2D();
+    document.body.appendChild(this.canvas);
+  };
+
+  initialize(callback: (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void) {
+    callback(this.ctx, this.canvas);
+  };
+
+  update(callback: (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement, time: number) => void) {
+    const gameLoop = () => {
+      requestAnimationFrame((time: number) => {
+        callback(this.ctx, this.canvas, time);
+        gameLoop();
+      });
+    };
+    gameLoop();
+  };
+
+  // Mouse event
+  mouseMove(callback: (e: MouseEvent) => void) {
+    document.body.addEventListener('mousemove', callback);
+  };
+
+  mouseLeave(callback: (e: MouseEvent) => void) {
+    this.canvas.addEventListener("mouseleave", callback);
+  };
+
+  mouseClick(callback: (e: MouseEvent) => void) {
+    this.canvas.addEventListener("click", callback);
+  };
+}
