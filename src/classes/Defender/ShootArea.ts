@@ -1,8 +1,8 @@
-import { CollisionArea } from "../interfaces/CollisionArea";
-import { Defender } from "../interfaces/Defender";
-import { GameObject, isMonster } from "../interfaces/GameObject";
-import { Dimension2D } from "./Dimension2D";
-import { Position2D } from "./Position2D";
+import { CollisionArea } from "../../interfaces/CollisionArea";
+import { Defender } from "../../interfaces/Defender";
+import { GameObject, isMonster } from "../../interfaces/GameObject";
+import { Dimension2D } from "../Dimension2D";
+import { Position2D } from "../Position2D";
 
 export class ShootArea implements CollisionArea {
   defender: Defender;

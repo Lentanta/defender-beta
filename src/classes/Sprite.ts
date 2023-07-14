@@ -3,10 +3,16 @@ import { SCALE } from "../utils/constants";
 export class Sprite {
   spriteSheet: HTMLImageElement;
   tileSize: number;
+  scaleRatio: number;
 
-  constructor(spriteSheet: HTMLImageElement, tileSize: number) {
+  constructor(
+    spriteSheet: HTMLImageElement,
+    tileSize: number,
+    scaleRatio?: number,
+  ) {
     this.spriteSheet = spriteSheet;
     this.tileSize = tileSize;
+    this.scaleRatio = scaleRatio ? scaleRatio : 1;
   };
 
   draw(

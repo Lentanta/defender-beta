@@ -10,7 +10,7 @@ import { Rectangle } from "./interfaces/Rectangle";
 
 import { Position2D } from "./classes/Position2D";
 import { Dimension2D } from "./classes/Dimension2D";
-import { DefenderGun } from "./classes/Defender";
+import { DefenderGun } from "./classes/Defender/Defender";
 import { NormalMonster } from "./classes/NormalMonster";
 
 import {
@@ -23,10 +23,6 @@ import { iterate2D } from "./utils/iterate2D";
 import {
   CANVAS_HEIGHT,
   CANVAS_WIDTH,
-  CARD_UI_HEIGHT,
-  CARD_UI_UNIT_HEIGHT,
-  CARD_UI_UNIT_WIDTH,
-  CARD_UI_WIDTH,
   NUMBER_OF_HORIZONTAL_TILES,
   NUMBER_OF_VERTICAL_TILES,
   PIXEL_SIZE,
@@ -35,20 +31,20 @@ import {
   TOP_MENU_UI_HEIGHT,
   TOP_MENU_UI_WIDTH,
   TYPE_1,
-  UNIT_SIZE
+  UNIT_SIZE,
+  DEFENDER,
+  PIXEL_16
 } from "./utils/constants";
 import { NormalBullet } from "./classes/NormalBullet";
 import { Timer } from "./classes/Timer";
-import { ShootArea } from "./classes/ShootArea";
-import { GameObjectManagement } from "./classes/GameObjectManagement";
+import { GameObjectManagement } from "./classes/Managements/GameObjectManagement";
+import { Sprite } from "./classes/Sprite";
+import { DefenderSelector } from "./classes/DefenderSelector";
 
 // ===== GLOBAL STATE ===== //
 let grid: Rectangle[] = [];
 
-const informationUI = await loadImage("/assets/informationUI.png");
-const cardUI = await loadImage("/assets/cardUI.png");
-const defendersSprite = await loadImage("assets/machines.png");
-const monstersImg = await loadImage("/assets/monsters.png");
+const spriteSheet = await loadImage("assets/sprite-sheet.png");
 
 const createGrid = () => {
   let grid: any = [];
@@ -103,21 +99,19 @@ duckEngine.mouseClick(() => {
   for (let index = 0; index < grid.length; index++) {
     const tile = grid[index];
 
-    const defenderPosition = new Position2D(
-      tile.position.x, tile.position.y);
-    const defenderDimension = new Dimension2D(
-      TILE_SIZE, TILE_SIZE);
+    const defenderPosition = new Position2D(tile.position.x, tile.position.y);
+    const defenderDimension = new Dimension2D(TILE_SIZE, TILE_SIZE);
 
     if (collisionRect(mouse, tile)) {
       const defender = new DefenderGun(
         defenderPosition,
         defenderDimension,
-        defendersSprite
+        new Sprite(spriteSheet, UNIT_SIZE)
       );
       gom.add(defender);
       gom.add(defender.ShootArea);
     };
-  }
+  } -0
 });
 
 duckEngine.initialize((ctx) => {
@@ -128,25 +122,52 @@ duckEngine.initialize((ctx) => {
 
 let monsterSpawnTimer = new Timer(1);
 
+const defenderSelector = new DefenderSelector(
+  DEFENDER.TYPE_0.INDEX,
+  new Sprite(spriteSheet, UNIT_SIZE),
+  new Position2D(0, 0),
+  new Dimension2D(0, 0)
+);
+
+const defenderSelector1 = new DefenderSelector(
+  DEFENDER.TYPE_1.INDEX,
+  new Sprite(spriteSheet, UNIT_SIZE),
+  new Position2D(PIXEL_16 * SCALE * 2, 0),
+  new Dimension2D(0, 0)
+);
+
+const defenderSelector2 = new DefenderSelector(
+  DEFENDER.TYPE_2.INDEX,
+  new Sprite(spriteSheet, UNIT_SIZE),
+  new Position2D(PIXEL_16 * SCALE * 4, 0),
+  new Dimension2D(PIXEL_16, 0)
+);
+
+const defenderSelector3 = new DefenderSelector(
+  DEFENDER.TYPE_3.INDEX,
+  new Sprite(spriteSheet, UNIT_SIZE),
+  new Position2D(PIXEL_16 * SCALE * 6, 0),
+  new Dimension2D(PIXEL_16, 0)
+);
+
 const spawnMonster = () => {
-  const positionY = (Math.floor(
-    Math.random() * 8 + 0) * TILE_SIZE) + TOP_MENU_UI_HEIGHT;
+  const positionY = (Math.floor(Math.random() * 8 + 0) * TILE_SIZE) + TOP_MENU_UI_HEIGHT;
+
   const monster = new NormalMonster(
     new Position2D(CANVAS_WIDTH, positionY),
     new Dimension2D(TILE_SIZE, TILE_SIZE),
-    monstersImg
+    spriteSheet
   );
   gom.add(monster);
 };
 
-duckEngine.update((ctx, canvas, timeStamp) => {
+duckEngine.update((ctx, _, timeStamp) => {
   setBackgroundColor(ctx);
 
-  ctx.drawImage(informationUI,
-    0, 0, (UNIT_SIZE * 3), (UNIT_SIZE * 2),
-    0, 0,
-    TOP_MENU_UI_WIDTH, TOP_MENU_UI_HEIGHT
-  );
+  defenderSelector.draw(ctx);
+  defenderSelector1.draw(ctx);
+  defenderSelector2.draw(ctx);
+  defenderSelector3.draw(ctx);
 
   if (monsterSpawnTimer.isTime(timeStamp)) {
     spawnMonster()
@@ -188,4 +209,6 @@ duckEngine.update((ctx, canvas, timeStamp) => {
   });
 
   gom.remove((object) => !object.isActive);
+
+
 });

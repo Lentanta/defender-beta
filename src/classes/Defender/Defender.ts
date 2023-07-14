@@ -1,16 +1,20 @@
-import { CANVAS_WIDTH, UNIT_SIZE } from "../utils/constants";
-import { Defender } from "../interfaces/Defender"
-import { GameObject, isMonster } from "../interfaces/GameObject";
+import {
+  CANVAS_WIDTH,
+  DEFENDER
+} from "../../utils/constants";
+import { Defender } from "../../interfaces/Defender"
+import { GameObject, isMonster } from "../../interfaces/GameObject";
 
-import { Position2D } from "./Position2D";
-import { Dimension2D } from "./Dimension2D";
-import { Timer } from "./Timer";
+import { Position2D } from "../Position2D";
+import { Dimension2D } from "../Dimension2D";
+import { Timer } from "../Timer";
 import { ShootArea } from "./ShootArea";
+import { Sprite } from "../Sprite";
 
 export class DefenderGun implements Defender {
   position: Position2D;
   dimension: Dimension2D;
-  sprite: HTMLImageElement;
+  sprite: Sprite;
 
   health: number = 10;
   maxHealth: number = 100;
@@ -19,7 +23,7 @@ export class DefenderGun implements Defender {
   isActive: boolean = true;
 
   type: string = "Defender";
-  defenderType: number = 1;
+  defenderType: number = DEFENDER.TYPE_0.INDEX;
 
   ShootArea: ShootArea;
   isShooting: boolean = false;
@@ -28,7 +32,7 @@ export class DefenderGun implements Defender {
   constructor(
     position: Position2D,
     dimension: Dimension2D,
-    sprite: HTMLImageElement
+    sprite: Sprite
   ) {
     this.position = position;
     this.dimension = dimension;
@@ -65,11 +69,11 @@ export class DefenderGun implements Defender {
   };
 
   draw(ctx: CanvasRenderingContext2D) {
-    ctx.drawImage(this.sprite,
-      this.defenderType * UNIT_SIZE, 0 * UNIT_SIZE,
-      UNIT_SIZE, UNIT_SIZE,
-      this.position.x, this.position.y,
-      this.dimension.width, this.dimension.height
+    this.sprite.draw(
+      ctx, this.defenderType,
+      this.position.x,
+      this.position.y,
+      1, 1
     )
   };
 

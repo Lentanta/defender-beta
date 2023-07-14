@@ -1,5 +1,5 @@
-import { GameObject } from "../interfaces/GameObject";
-import { isRectangleCollideRectangle } from "../utils/collision";
+import { GameObject } from "../../interfaces/GameObject";
+import { isRectangleCollideRectangle } from "../../utils/collision";
 
 export class GameObjectManagement {
   gameObjects: GameObject[];

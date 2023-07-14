@@ -1,4 +1,5 @@
 export const UNIT_SIZE = 16;
+export const PIXEL_16 = 16; 
 
 export const SCALE = 3;
 
@@ -23,3 +24,26 @@ export const TYPE_0 = 0;
 export const TYPE_1 = 1;
 export const TYPE_2 = 2;
 export const TYPE_3 = 3;
+
+export const DEFENDER = {
+  TYPE_0: {
+    INDEX: 0,
+    WIDTH: 1,
+    HEIGHT: 1
+  },
+  TYPE_1: {
+    INDEX: 1,
+    WIDTH: 1,
+    HEIGHT: 1
+  },
+  TYPE_2: {
+    INDEX: 2,
+    WIDTH: 1,
+    HEIGHT: 1
+  },
+  TYPE_3: {
+    INDEX: 3,
+    WIDTH: 1,
+    HEIGHT: 1
+  }
+}

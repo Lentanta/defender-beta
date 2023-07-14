@@ -1,3 +1,4 @@
+import { Sprite } from "../classes/Sprite";
 import { GameObject } from "./GameObject";
 
 export interface Dimension {
@@ -20,7 +21,7 @@ export interface Move {
 };
 
 export interface Draw {
-  sprite?: HTMLImageElement;
+  sprite?: HTMLImageElement | Sprite;
   draw(ctx: CanvasRenderingContext2D): void;
 };
 
