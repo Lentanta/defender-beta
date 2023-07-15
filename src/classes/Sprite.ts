@@ -1,29 +1,25 @@
-import { SCALE } from "../utils/constants";
+import { Dimension } from "../interfaces/Interfaces";
+import { Position2D } from "./Position2D";
+import { TILE_SIZE } from "../utils/constants";
 
 export class Sprite {
   spriteSheet: HTMLImageElement;
-  tileSize: number;
-  scaleRatio: number;
 
   constructor(
     spriteSheet: HTMLImageElement,
-    tileSize: number,
-    scaleRatio?: number,
   ) {
     this.spriteSheet = spriteSheet;
-    this.tileSize = tileSize;
-    this.scaleRatio = scaleRatio ? scaleRatio : 1;
   };
 
   draw(
     ctx: CanvasRenderingContext2D,
     index: number,
-    posX: number,
-    posY: number,
-    width: number,
-    height: number
+    spriteWidth: number,
+    spriteHeight: number,
+    position: Position2D,
+    dimension: Dimension
   ) {
-    const columns = this.spriteSheet.width / this.tileSize;
+    const columns = this.spriteSheet.width / TILE_SIZE;
 
     const spriteXCoordinate = index % columns;
     const spriteYCoordinate = Math.floor(index / columns);
@@ -31,15 +27,15 @@ export class Sprite {
     ctx.drawImage(this.spriteSheet,
 
       // This is for size in sprite sheet
-      spriteXCoordinate * this.tileSize,
-      spriteYCoordinate * this.tileSize,
-      width * this.tileSize,
-      height * this.tileSize,
+      spriteXCoordinate * TILE_SIZE,
+      spriteYCoordinate * TILE_SIZE,
+      spriteWidth * TILE_SIZE,
+      spriteHeight * TILE_SIZE,
 
       // This is for size when draw
-      posX, posY,
-      width * SCALE * this.tileSize,
-      height * SCALE * this.tileSize
+      position.x, position.y,
+      dimension.width,
+      dimension.height
     );
   };
 };

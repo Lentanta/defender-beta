@@ -1,6 +1,5 @@
 import {
-  CANVAS_WIDTH,
-  DEFENDER
+  CANVAS_WIDTH, DEFENDER_INDEX
 } from "../../utils/constants";
 import { Defender } from "../../interfaces/Defender"
 import { GameObject, isMonster } from "../../interfaces/GameObject";
@@ -23,17 +22,19 @@ export class DefenderGun implements Defender {
   isActive: boolean = true;
 
   type: string = "Defender";
-  defenderType: number = DEFENDER.TYPE_0.INDEX;
+  defenderType: number = DEFENDER_INDEX.TYPE_1;
 
   ShootArea: ShootArea;
   isShooting: boolean = false;
   shootTimer: Timer;
 
   constructor(
+    defenderType: DEFENDER_INDEX,
     position: Position2D,
     dimension: Dimension2D,
     sprite: Sprite
   ) {
+    this.defenderType = defenderType;
     this.position = position;
     this.dimension = dimension;
 
@@ -70,10 +71,11 @@ export class DefenderGun implements Defender {
 
   draw(ctx: CanvasRenderingContext2D) {
     this.sprite.draw(
-      ctx, this.defenderType,
-      this.position.x,
-      this.position.y,
-      1, 1
+      ctx,
+      this.defenderType,
+      1, 1,
+      this.position,
+      this.dimension
     )
   };
 

@@ -1,4 +1,4 @@
-import { SCALE } from "../utils/constants";
+import { PIXEL_AFTER_SCALE, TILE_AFTER_SCALE } from "../utils/constants";
 import { Dimension2D } from "./Dimension2D";
 import { Position2D } from "./Position2D";
 import { Sprite } from "./Sprite";
@@ -26,16 +26,20 @@ export class DefenderSelector {
   draw(ctx: CanvasRenderingContext2D) {
     this.sprite.draw(
       ctx, 7,
-      this.position.x,
-      this.position.y,
-      2, 2
+      2, 2,
+      this.position,
+      this.dimension
     )
 
     this.sprite.draw(
       ctx, this.defenderType,
-      this.position.x + (SCALE * 8),
-      this.position.y + (SCALE * 5),
-      1, 1
-    )
+      1, 1,
+      new Position2D(
+        this.position.x + (PIXEL_AFTER_SCALE * 8),
+        this.position.y + (PIXEL_AFTER_SCALE * 5)),
+      new Dimension2D(
+        TILE_AFTER_SCALE,
+        TILE_AFTER_SCALE
+      ))
   }
 }

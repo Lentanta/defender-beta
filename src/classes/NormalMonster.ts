@@ -1,6 +1,6 @@
 import { Position2D } from "./Position2D";
 import { Dimension2D } from "./Dimension2D";
-import { UNIT_SIZE } from "../utils/constants";
+import { MONSTER_INDEX, TILE_SIZE } from "../utils/constants";
 import { Monster } from "../interfaces/Monster";
 import { GameObject, isBullet, isDefender } from "../interfaces/GameObject";
 
@@ -9,7 +9,7 @@ export class NormalMonster implements Monster {
   dimension: Dimension2D;
 
   type: string = "Monster";
-  monsterType: number = 0;
+  monsterType: number = MONSTER_INDEX.TYPE_0;
 
   health: number = 100;
   maxHealth: number = 100;
@@ -31,8 +31,8 @@ export class NormalMonster implements Monster {
 
   draw(ctx: CanvasRenderingContext2D) {
     ctx.drawImage(this.sprite,
-      this.monsterType * UNIT_SIZE, 0 * UNIT_SIZE,
-      UNIT_SIZE, UNIT_SIZE,
+      this.monsterType * TILE_SIZE, 0 * TILE_SIZE,
+      TILE_SIZE, TILE_SIZE,
       this.position.x, this.position.y,
       this.dimension.width, this.dimension.height
     )

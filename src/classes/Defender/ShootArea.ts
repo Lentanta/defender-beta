@@ -24,13 +24,13 @@ export class ShootArea implements CollisionArea {
   };
 
   draw(ctx: CanvasRenderingContext2D): void {
-    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
-    ctx.fillRect(
-      this.position.x,
-      this.position.y,
-      this.dimension.width,
-      this.dimension.height
-    );
+    // ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+    // ctx.fillRect(
+    //   this.position.x,
+    //   this.position.y,
+    //   this.dimension.width,
+    //   this.dimension.height
+    // );
   };
 
   notCollided(): void {
