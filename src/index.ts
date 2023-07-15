@@ -37,7 +37,7 @@ import { setBackgroundColor } from "./utils/setBackgroundColor";
 
 // ===== GLOBAL STATE ===== //
 let tiles: (Rectangle & { isEmpty: boolean })[] = [];
-let selectedDefenderType = DEFENDER_INDEX.TYPE_0;
+let selectedDefenderType = DEFENDER_INDEX.TYPE_1;
 
 const spriteSheet = await loadImage("assets/sprite-sheet.png");
 const sprite = new Sprite(spriteSheet);
@@ -68,20 +68,10 @@ let mouse: Rectangle = {
   dimension: new Dimension2D(0.1, 0.1)
 };
 
-const defenderSelector = new DefenderSelector(
-  DEFENDER_INDEX.TYPE_0,
-  sprite,
-  new Position2D(0, 0),
-  new Dimension2D(
-    TILE_AFTER_SCALE * 2,
-    TILE_AFTER_SCALE * 2
-  )
-);
-
 const defenderSelector1 = new DefenderSelector(
   DEFENDER_INDEX.TYPE_1,
   sprite,
-  new Position2D(TILE_AFTER_SCALE * 2, 0),
+  new Position2D(TILE_AFTER_SCALE * 3, 0),
   new Dimension2D(
     TILE_AFTER_SCALE * 2,
     TILE_AFTER_SCALE * 2
@@ -91,7 +81,7 @@ const defenderSelector1 = new DefenderSelector(
 const defenderSelector2 = new DefenderSelector(
   DEFENDER_INDEX.TYPE_2,
   sprite,
-  new Position2D(TILE_AFTER_SCALE * 4, 0),
+  new Position2D(TILE_AFTER_SCALE * 5, 0),
   new Dimension2D(
     TILE_AFTER_SCALE * 2,
     TILE_AFTER_SCALE * 2
@@ -101,7 +91,7 @@ const defenderSelector2 = new DefenderSelector(
 const defenderSelector3 = new DefenderSelector(
   DEFENDER_INDEX.TYPE_3,
   sprite,
-  new Position2D(TILE_AFTER_SCALE * 6, 0),
+  new Position2D(TILE_AFTER_SCALE * 7, 0),
   new Dimension2D(
     TILE_AFTER_SCALE * 2,
     TILE_AFTER_SCALE * 2
@@ -109,7 +99,6 @@ const defenderSelector3 = new DefenderSelector(
 );
 
 let defenderSelectors = [
-  defenderSelector,
   defenderSelector1,
   defenderSelector2,
   defenderSelector3,
